@@ -76,9 +76,11 @@ class TwoPhaseSimplex:
             r,s = self.__find_pivot()
             self.__pivot(r,s)
             basis[r] = s # beware of this line for the time being
-        print(self.__tableau)
     
     def solve_program(self) -> None:
         """Induces the solving of the phase 2 simplex problem prescribed by the object"""
         self.__construct_tableau()
         self.__solve_auxillary_problem()
+
+    def get_tableau(self) -> np.array:
+        return self.__tableau
