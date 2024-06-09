@@ -13,7 +13,9 @@ class TwoPhaseSimplex:
         self.__tableau : np.array[int] = np.zeros((len(A) + 1, len(A)+len(A[0])+1))
 
     def __construct_tableau(self) -> None:
-        """Constructs the two phase simplex tableau"""
+        """
+        Constructs the two phase simplex tableau
+        """
         m : int = self.__A.shape[0]
         n : int = self.__A.shape[1]
         e : np.array[int] = np.ones(m)
@@ -29,7 +31,9 @@ class TwoPhaseSimplex:
         self.__tableau[1:m+1, n+1:n+m+1] = np.identity(m)
 
     def __find_pivot(self) -> tuple[int,int]:
-        """Find the pivot (r,s) on the tableau using Bland's rule"""
+        """
+        Find the pivot (r,s) on the tableau using Bland's rule
+        """
         m : int = self.__tableau.shape[0]
         s = 1
         while self.__tableau[0,s] >= 0:
@@ -48,17 +52,22 @@ class TwoPhaseSimplex:
             raise Exception()
         return (r,s)
     
-    def __pivot(self, r : int, s : int):
-        """Induces pivoting operations on the (r,s) entry of the tableau,
+    def __pivot(self, r : int, s : int) -> None:
+        """
+        Induces pivoting operations on the (r,s) entry of the tableau,
         this causes the rth row to be divide by tableau[r,s] and then all entries
-        on the sth column to become 0 other than where the row is r."""
+        on the sth column to become 0 other than where the row is r.
+        """
         m : int = self.__tableau.shape[0]
         self.__tableau[r] /= self.__tableau[r,s]
         for i in range(m):
             if i != r:
                 self.__tableau[i] -= self.__tableau[r]*self.__tableau[i,s]
 
-    def __solve_auxillary_problem(self) : 
+    def __solve_auxillary_problem(self) -> None: 
+        """
+        Solves the auxillary problem using the phase 1 simplex method
+        """
         m : int = self.__tableau.shape[0]
         n : int = self.__tableau.shape[1]
         # basis is always the auxillary variables
@@ -68,7 +77,6 @@ class TwoPhaseSimplex:
             self.__pivot(r,s)
             basis[r] = s # beware of this line for the time being
         print(self.__tableau)
-        pass
     
     def solve_program(self) -> None:
         """Induces the solving of the phase 2 simplex problem prescribed by the object"""
