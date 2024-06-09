@@ -64,7 +64,7 @@ class TwoPhaseSimplex:
             if i != r:
                 self.__tableau[i] -= self.__tableau[r]*self.__tableau[i,s]
 
-    def __solve_auxillary_problem(self) -> None: 
+    def __solve_auxillary_problem(self) -> np.array: 
         """
         Solves the auxillary problem using the phase 1 simplex method
         """
@@ -76,11 +76,79 @@ class TwoPhaseSimplex:
             r,s = self.__find_pivot()
             self.__pivot(r,s)
             basis[r] = s # beware of this line for the time being
+        return basis
+
+    def __check_tableau_for_constraint_violation(self, basis : np.array) -> bool:
+        m : int = self.__A.shape[0]
+        n : int = self.__A.shape[1]
+        for var in basis:
+            if not(var >= n+1 and var <= m+n) and var != 0:
+                return False
+        return True
     
+    def __drive_auxillary_variables_from_basis(self, basis : np.array) -> np.array:
+        """
+        Removes auxillary variables from the basis of the simplex tableau, sets up for phase 2
+        """
+        m : int = self.__A.shape[0]
+        n : int = self.__A.shape[1]
+        for r, var in enumerate(basis):
+            # if auxillary variable is in basis
+            if var >= n+1 and var <= m+n:
+                # pivot on any non-zero entry on that basis variables row
+                for s, var2 in enumerate(self.__tableau[r]):
+                    if (var2 != 0):
+                        self.__pivot(r,s)
+                        # to drive the auxillary variable from basis
+                        basis[r] = s
+        return basis
+    
+    def __get_solution(self, basis : np.array):
+        """
+        Gets the current solution stored in the tableau, all variables not included in basis are 0 by construction
+        """
+        m : int = self.__A.shape[0]
+        n : int = self.__A.shape[1]
+        solutions : np.array = np.zeros(n)
+        for i in range(1, m + 1):
+            # basis contains the numbered variable which is in the index row
+            solutions[basis[i]] = self.__tableau[i,0]
+        return solutions
+    
+    def __change_tableau_to_phase_one(self, basis : np.array) -> None:
+        """
+        changes the objective function and removes columns of the auxillary variables,
+        preparing the tableau for phase 2.
+        """
+        phase_one_solution : np.array = self.__get_solution(basis)
+        self.__tableau[0,0] = -np.dot(self.__c, phase_one_solution)
+        n : int = self.__A.shape[1]
+        # take a copy of the tableau and remove the auxillary variables
+        temp : np.array = self.__tableau[0:, 0:n+1].copy()
+        # make the new tableau this copy
+        self.__tableau = temp
+
+    def __solve_phase_two(self, basis : np.array) -> np.array:
+        """
+        Returns the final solution of the phase 2 simplex problem
+        """
+        pass
+
+
     def solve_program(self) -> None:
         """Induces the solving of the phase 2 simplex problem prescribed by the object"""
         self.__construct_tableau()
-        self.__solve_auxillary_problem()
+        basis : np.array = self.__solve_auxillary_problem()
+        valid : bool = self.__check_tableau_for_constraint_violation(basis)
+        # if any optimal y is non-zero then throw an error
+        if (not valid):
+            print("")
+            raise Exception()
+        basis = self.__drive_auxillary_variables_from_basis(basis)
+        self.__change_tableau_to_phase_one(basis)
+        self.__solve_phase_two(basis)
+        
 
     def get_tableau(self) -> np.array:
+        """Returns the tableau current state"""
         return self.__tableau
