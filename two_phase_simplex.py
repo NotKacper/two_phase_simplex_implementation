@@ -2,18 +2,34 @@ import numpy as np
 
 
 class TwoPhaseSimplex:
-    def __init__(self, A: list[int, int], b: list[int], c: list[int]) -> None:
+    def __init__(self, A: list[float, float], b: list[float], c: list[float]) -> None:
         """
         Initializes the TwoPhaseSimplex solver object in terms of it's distinguishing components
         The problem to be solved is of the form: min c*x, s.t. Ax=b.
         Assumes that the problem must be translated to auxillary form.
         """
-        self.__A: np.array[int][int] = np.array(A)
-        self.__b: np.array[int] = np.array(b)
-        self.__c: np.array[int] = np.array(c)
-        self.__tableau: np.array[int] = np.zeros(
+        valid, message = self.__check_validity_of_arguments(A,b,c)
+        if not(valid):
+            raise Exception("Invalid linear programming problem described: " + message)
+        self.__A: np.array[float][float] = np.array(A)
+        self.__b: np.array[float] = np.array(b)
+        self.__c: np.array[float] = np.array(c)
+        self.__tableau: np.array[float] = np.zeros(
             (len(A) + 1, len(A)+len(A[0])+1))
-        self.__solution: np.array[int] = None
+        self.__solution: np.array[float] = None
+
+    def __check_validity_of_arguments(self, A :list[float,float], b : list[float] , c : list[float]):
+        m = len(A)
+        if (m <= 0):
+            return False, "A should have a postive number of rows"
+        n = len(A[0])
+        if (n <= 0):
+            return False, "A should have a positive number of columns"
+        if (len(b) != m):
+            return False, "Vector b does not have the same length as matrix A has rows"
+        elif (len(c) != n):
+            return False, "Vector c does not have the same length as matrix A has columns"
+        return True, ""
 
     def __construct_tableau(self) -> None:
         """
