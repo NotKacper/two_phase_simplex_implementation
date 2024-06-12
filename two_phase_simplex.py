@@ -114,11 +114,12 @@ class TwoPhaseSimplex:
             # if auxillary variable is in basis
             if var >= n+1 and var <= m+n:
                 # pivot on any non-zero entry on that basis variables row
-                for s, var2 in enumerate(self.__tableau[r]):
+                for s, var2 in enumerate(self.__tableau[r+1,1:]):
                     if (var2 != 0):
-                        self.__pivot(r, s)
+                        self.__pivot(r+1, s+1)
                         # to drive the auxillary variable from basis
-                        basis[r] = s
+                        basis[r] = s+1
+                        break
         return basis
 
     def __get_solution(self, basis: np.array):
@@ -159,8 +160,6 @@ class TwoPhaseSimplex:
         Solves the phase 2 simplex by applying the phase 1 simplex onto the 
         new tableau.
         """
-        m: int = self.__A.shape[0]
-        n: int = self.__A.shape[1]
         while (self.__tableau[0, 1:].min() < 0):
             r, s = self.__find_pivot()
             self.__pivot(r, s)
@@ -177,11 +176,11 @@ class TwoPhaseSimplex:
         Returns False if the problem is unbounded
         """
         basis: np.array = self.solve_phase_one()
+        basis = self.__drive_auxillary_variables_from_basis(basis)
         valid: bool = self.__check_tableau_for_constraint_violation(basis)
         # if any optimal y is non-zero then throw an error
         if (not valid):
             return False
-        basis = self.__drive_auxillary_variables_from_basis(basis)
         self.__change_tableau_to_phase_two(basis)
         basis = self.__solve_phase_two(basis)
         self.__store_solution(basis)
