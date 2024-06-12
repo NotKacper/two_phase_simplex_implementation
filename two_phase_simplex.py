@@ -11,6 +11,7 @@ class TwoPhaseSimplex:
         self.__b : np.array[int] = np.array(b)
         self.__c : np.array[int] = np.array(c)
         self.__tableau : np.array[int] = np.zeros((len(A) + 1, len(A)+len(A[0])+1))
+        self.__solution : np.array[int] = None
 
     def __construct_tableau(self) -> None:
         """
@@ -49,7 +50,7 @@ class TwoPhaseSimplex:
         # problem infeasible if this is true
         if r == 0:
             print("Error : Problem is infeasible, minimum ratio test failed")
-            raise Exception()
+            return
         return (r,s)
     
     def __pivot(self, r : int, s : int) -> None:
@@ -82,7 +83,7 @@ class TwoPhaseSimplex:
         m : int = self.__A.shape[0]
         n : int = self.__A.shape[1]
         for var in basis:
-            if not(var >= n+1 and var <= m+n) and var != 0:
+            if var >= n+1 and var <= m+n and var != 0:
                 return False
         return True
     
@@ -106,16 +107,17 @@ class TwoPhaseSimplex:
     def __get_solution(self, basis : np.array):
         """
         Gets the current solution stored in the tableau, all variables not included in basis are 0 by construction
+        Note that the solutions array returned has 0 indexed variable numbers (i.e. 0th index is the 1st variable).
         """
         m : int = self.__A.shape[0]
         n : int = self.__A.shape[1]
         solutions : np.array = np.zeros(n)
         for i in range(1, m + 1):
             # basis contains the numbered variable which is in the index row
-            solutions[basis[i]] = self.__tableau[i,0]
+            solutions[basis[i] - 1] = self.__tableau[i,0]
         return solutions
     
-    def __change_tableau_to_phase_one(self, basis : np.array) -> None:
+    def __change_tableau_to_phase_two(self, basis : np.array) -> None:
         """
         changes the objective function and removes columns of the auxillary variables,
         preparing the tableau for phase 2.
@@ -131,7 +133,6 @@ class TwoPhaseSimplex:
     def solve_phase_one(self) -> np.array:
         self.__construct_tableau()
         basis : np.array = self.__solve_auxillary_problem()
-
         return basis
 
     def __solve_phase_two(self, basis : np.array) -> np.array:
@@ -146,10 +147,10 @@ class TwoPhaseSimplex:
         valid : bool = self.__check_tableau_for_constraint_violation(basis)
         # if any optimal y is non-zero then throw an error
         if (not valid):
-            print("")
-            raise Exception()
+            print("Problem is infeasible or unbounded")
+            return
         basis = self.__drive_auxillary_variables_from_basis(basis)
-        self.__change_tableau_to_phase_one(basis)
+        self.__change_tableau_to_phase_two(basis)
         self.__solve_phase_two(basis)
         
 
