@@ -128,17 +128,21 @@ class TwoPhaseSimplex:
         # make the new tableau this copy
         self.__tableau = temp
 
+    def solve_phase_one(self) -> np.array:
+        self.__construct_tableau()
+        basis : np.array = self.__solve_auxillary_problem()
+
+        return basis
+
     def __solve_phase_two(self, basis : np.array) -> np.array:
         """
         Returns the final solution of the phase 2 simplex problem
         """
         pass
 
-
     def solve_program(self) -> None:
         """Induces the solving of the phase 2 simplex problem prescribed by the object"""
-        self.__construct_tableau()
-        basis : np.array = self.__solve_auxillary_problem()
+        basis : np.array = self.solve_phase_one()
         valid : bool = self.__check_tableau_for_constraint_violation(basis)
         # if any optimal y is non-zero then throw an error
         if (not valid):
