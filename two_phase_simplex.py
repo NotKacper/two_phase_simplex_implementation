@@ -48,7 +48,7 @@ class TwoPhaseSimplex:
             return False, "A should have a positive number of columns"
         if len(b) != m:
             return False, "Vector b does not have the same length as matrix A has rows"
-        elif len(c) != n:
+        if len(c) != n:
             return (
                 False,
                 "Vector c does not have the same length as matrix A has columns",
@@ -128,7 +128,7 @@ class TwoPhaseSimplex:
         n: int
         m, n = self.__a.shape
         for var in basis:
-            if var >= n + 1 and var <= m + n and var != 0:
+            if n + 1 <= var <= m + n and self.__tableau[0,var] != 0:
                 return False
         return True
 
@@ -141,7 +141,7 @@ class TwoPhaseSimplex:
         m, n = self.__a.shape
         for r, var in enumerate(basis):
             # if auxillary variable is in basis
-            if var >= n + 1 and var <= m + n:
+            if n + 1 <= var <= m + n:
                 # pivot on any non-zero entry on that basis variables row
                 for s, var2 in enumerate(self.__tableau[r + 1, 1:]):
                     if var2 != 0:
