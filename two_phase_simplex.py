@@ -1,10 +1,8 @@
 import numpy as np
-from typing import Union
-
-num = Union[float, int]
+from typing import Sequence
 
 class TwoPhaseSimplex:
-    def __init__(self, A: list[list[num]], b: list[num], c: list[num]) -> None:
+    def __init__(self, A: Sequence[Sequence[float]], b: Sequence[float], c: Sequence[float]) -> None:
         """
         Initializes the TwoPhaseSimplex solver object in terms of it's distinguishing components
         The problem to be solved is of the form: min c*x, s.t. Ax=b.
@@ -19,7 +17,7 @@ class TwoPhaseSimplex:
         self.__tableau: np.ndarray = np.zeros((len(A) + 1, len(A)+len(A[0])+1))
         self.__solution: np.ndarray = np.zeros(len(c))
 
-    def __check_validity_of_arguments(self, A :list[list[num]], b : list[num] , c : list[num]) -> tuple[bool, str]:
+    def __check_validity_of_arguments(self, A :Sequence[Sequence[float]], b : Sequence[float] , c : Sequence[float]) -> tuple[bool, str]:
         """
         Returns a bool referring to whether the input makes any sense as a linear program, if false it contains a
         meaningful error message pertaining as to why the input doesn't make any sense.
