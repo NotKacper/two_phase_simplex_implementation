@@ -161,9 +161,12 @@ class TwoPhaseSimplex:
         """
         n: int = self._a.shape[1]
         solutions: np.ndarray = np.zeros(n)
-        for i, var in enumerate(basis):
+        for i, var in enumerate(basis,1):
             # basis contains the numbered variable which is in the index
-            solutions[var - 1] = self._tableau[i + 1, 0]
+            print(basis)
+            print(var)
+            print(self._a.shape)
+            solutions[var - 1] = self._tableau[i, 0]
         return solutions
 
     def _change_tableau_to_phase_two(self, basis: np.ndarray) -> None:
